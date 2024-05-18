@@ -1,28 +1,26 @@
 import random
 
 
-def acharCaminho(pInicial, pFinal, matriz, indicesUsados, caminho):
-    """
-    Pegar caminhos diferentes
-    Mostrar o caminho que pegou (feito +-)
+def acharCaminho(pInicial, pFinal, matriz, caminho, valorAresta=0):
 
-    """
     contador = 0
     if pInicial == pFinal:
-
+        caminho = [x + 1 for x in caminho]
+        caminho = " -> ".join(map(str, caminho))
+        print(f"{caminho}: {valorAresta}")
         return 0
     for _ in matriz[pInicial]:
+        valor = matriz[pInicial][contador]
 
-        if matriz[pInicial][contador] == 0:
+        if valor == 0:
             ...
-        elif contador not in indicesUsados:
-            indicesUsados.append(contador)
-            var = acharCaminho(contador, pFinal, matriz, indicesUsados, caminho)
-            if not (var == None):
-                caminho.insert(0, contador + 1)
-                return matriz[pInicial][contador] + var
+        elif contador not in caminho:
+            valorAresta += valor
+            caminho.append(contador)
+            acharCaminho(contador, pFinal, matriz, caminho.copy(), valorAresta)
+            caminho.pop()
+            valorAresta -= valor
         contador += 1
-    return None
 
 
 def iniciarMatriz():
@@ -34,14 +32,6 @@ def iniciarMatriz():
                 lista[i][j] = 0
             else:
                 lista[i][j] = 0
-    # lista = [
-    #     [0, 12, 4, 0, 0, 0],
-    #     [0, 0, 6, 6, 0, 0],
-    #     [0, 0, 0, 0, 2, 0],
-    #     [0, 0, 8, 0, 0, 6],
-    #     [0, 0, 0, 0, 0, 6],
-    #     [0, 0, 0, 0, 0, 0],
-    # ]
     return lista
 
 
@@ -50,7 +40,7 @@ def main():
     while True:
         escolha = int(
             input(
-                "\n1: Iniciar a Matriz\n2: Mostrar a Matriz\n3: Editar a Matriz\n4: Números Aleatórios\n5: Excluir a Matriz\n6: Achar caminho\n"
+                "\n1: Iniciar a Matriz\n2: Mostrar a Matriz\n3: Editar a Matriz\n4: Números Aleatórios\n5: Achar caminho\n6: Excluir a Matriz\n"
             )
         )
 
@@ -69,7 +59,7 @@ def main():
                 else:
                     matriz[x - 1][y - 1] = valor
                     if not orientadoBool:
-                        matriz[y-1][x-1] = valor
+                        matriz[y - 1][x - 1] = valor
 
         elif escolha == 4 and isinstance(matriz, list):
             lenght = len(matriz)
@@ -78,19 +68,14 @@ def main():
                     if not i == j:
                         matriz[j][i] = random.randrange(0, 10)
         elif escolha == 5 and isinstance(matriz, list):
+            pInicial = int(input("Ponto inicial: ")) - 1
+            pFinal = int(input("Ponto final: ")) - 1
+            caminho = [pInicial]
+            acharCaminho(pInicial, pFinal, matriz, caminho.copy())
+
+        elif escolha == 6 and isinstance(matriz, list):
             matriz = 0
             print("Matriz apagada")
-        elif escolha == 6 and isinstance(matriz, list):
-            pInicial = int(input("Ponto inicial: "))
-            pFinal = int(input("Ponto final: "))
-            indicesUsados = [pInicial]
-            caminho = []
-            var = acharCaminho(
-                pInicial - 1, pFinal - 1, matriz, indicesUsados.copy(), caminho
-            )
-            caminho.insert(0, pInicial)
-            if var:
-                print(f"{caminho}: {var}")
 
         else:
             if not isinstance(matriz, list):
