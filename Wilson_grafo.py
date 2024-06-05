@@ -1,25 +1,55 @@
 import random
+import threading
 
 
-def acharCaminho(pInicial, pFinal, matriz, caminho, valorAresta=0):
+qtde = 0
+menorValor = 0
+caminhoMaisRapido = ""
+matriz = 0
+threads = []
+primeiraVezPassando = True
 
+
+def acharCaminho(
+    pInicial,
+    pFinal,
+    caminho,
+    valorAresta=0,
+):
+    global matriz
     contador = 0
     if pInicial == pFinal:
+        global qtde, menorValor, caminhoMaisRapido, primeiraVezPassando
         caminho = [x + 1 for x in caminho]
         caminho = " -> ".join(map(str, caminho))
-        print(f"{caminho}: {valorAresta}")
+        if primeiraVezPassando:
+            primeiraVezPassando = False
+            menorValor = valorAresta
+        elif menorValor > valorAresta:
+            menorValor = valorAresta
+            caminhoMaisRapido = caminho
+
+        qtde += 1
+        print(f"{caminho}: {valorAresta}\n")
         return 0
     for _ in matriz[pInicial]:
         valor = matriz[pInicial][contador]
 
-        if valor == 0:
-            ...
-        elif contador not in caminho:
-            valorAresta += valor
-            caminho.append(contador)
-            acharCaminho(contador, pFinal, matriz, caminho.copy(), valorAresta)
-            caminho.pop()
-            valorAresta -= valor
+        if contador not in caminho and valor > 0:
+
+            global threads
+            thread = threading.Thread(
+                target=acharCaminho,
+                args=(
+                    contador,
+                    pFinal,
+                    caminho.copy() + [contador],
+                    valorAresta + valor,
+                ),
+            )
+            threads.append(thread)
+            thread.start()
+
         contador += 1
 
 
@@ -36,7 +66,7 @@ def iniciarMatriz():
 
 
 def main():
-    matriz = 0
+    global matriz
     while True:
         escolha = int(
             input(
@@ -53,6 +83,7 @@ def main():
             orientadoBool = input("É orientado ou não? (Y/N)").upper() == "Y"
             arestas = int(input("Quantas arestas?\n"))
             for i in range(arestas):
+                # Escrever no formato p1,p2,valor
                 x, y, valor = map(int, input("Índices e valor: ").split(","))
                 if y == x:
                     print("Os índice não podem ser iguais")
@@ -71,7 +102,13 @@ def main():
             pInicial = int(input("Ponto inicial: ")) - 1
             pFinal = int(input("Ponto final: ")) - 1
             caminho = [pInicial]
-            acharCaminho(pInicial, pFinal, matriz, caminho.copy())
+            global threads
+            acharCaminho(pInicial, pFinal, caminho.copy())
+            for i in threads:
+                i.join()
+            print(
+                f"De {qtde} repetições, o caminho mais rápido é {caminhoMaisRapido} com valor {menorValor}\n"
+            )
 
         elif escolha == 6 and isinstance(matriz, list):
             matriz = 0
